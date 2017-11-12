@@ -2,21 +2,21 @@
 
 	// http://wiki.bash-hackers.org/scripting/terminalcodes
 	// https://misc.flogisoft.com/bash/tip_colors_and_formatting#colors
-	const ANSI = {
+	const ANSI_Styles = {
 		0: {color: "lightgrey", "background-color": "black", "font-weight": "initial", "text-decoration": "initial", opacity: 1},
 		1: {"font-weight": "bold"},
-		2: {}, //DIM
-		4: {"text-decoration": "underline"},
+		2: {"opacity": "0.8"}, //DIM
+		4: {"text-decoration": "underline"}, //underlined
 		5: {}, //BLINK
 		7: {}, //REVERSE (swap fg & bg)
-		8: {opacity: "0"},
+		8: {opacity: "0"}, // hidden
 
 		21:	{"font-weight": "initial"}, //Reset bold/bright
-		22:	{}, //Reset dim
+		22:	{opacity: 1}, //Reset dim
 		24:	{"text-decoration": "initial"}, //Reset underlined
 		25:	{}, //Reset blink
 		27:	{}, //Reset reverse
-		28:	{opacity: 1},
+		28:	{opacity: 1}, //Reset hidden
 
 
 		30: {color: "black;"},
@@ -63,16 +63,16 @@
 			.join(del2) + (o.length > 0 ? del2 : "");
 	}
 
-	const regex = /\x1B\x5b([0-9;]+m)/gu;
+	const regex = /\x1B\x5b([0-9;]+m|[0-9][KG])/gu;
 
-	function ansiToHTML(s, defaultFG, defaultBG){
+	function ansiToHTML(s, defaultFG, defaultBG, parseInteractive=true){
 		if(defaultBG){
-			ANSI[0]["background-color"] = defaultBG;
-			ANSI[49]["background-color"] = defaultBG;
+			ANSI_Styles[0]["background-color"] = defaultBG;
+			ANSI_Styles[49]["background-color"] = defaultBG;
 		}
 		if(defaultFG){
-			ANSI[0]["color"] = defaultFG;
-			ANSI[39]["color"] = defaultFG;
+			ANSI_Styles[0]["color"] = defaultFG;
+			ANSI_Styles[39]["color"] = defaultFG;
 		}
 
 		let last = {};
@@ -86,15 +86,18 @@
 					return `<span style="${p1.slice(0, -1).split(";")
 							.map((v)=>{
 								const vi = parseInt(v);
-								const style = ANSI[vi];
+								const style = ANSI_Styles[vi];
+								console.log(p1, style)
 								if(style){
 									last = {...last, ...style}
-									return objToCSS(ANSI[vi]);
+									return objToCSS(ANSI_Styles[vi]);
 								} else {
 									console.err("unknown ansi code:" + vi);
 									return "";
 								}
 							}).join(" ")}">`;
+				} else{
+					return "";
 				}
 			}
 
@@ -102,9 +105,13 @@
 			return v;
 		}
 
-		return s.split("\n").map((s)=>{
-			return line(s);
-		}).join("\n");
+		// http://www.rapidtables.com/code/text/ascii-table.htm
+		// http://wiki.bash-hackers.org/scripting/terminalcodes
+		let output = parseInteractive ? s.replace(/\r\n/g, "\n").replace(/\r +\r/g, "") : s;
+
+		return output.split("\n").map((s)=>{
+				return line(s);
+			}).join("\n");
 	}
 
 	if ('module' in global) {

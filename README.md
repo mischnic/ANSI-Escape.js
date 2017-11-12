@@ -7,8 +7,15 @@ To save a command's output into a file _with escape sequences_ use: `script -q /
 ## Usage
 
 ```javascript
-// Function signature:
-function ansiToHTML(input, /*defaultFG, defaultBG*/){
+/* >>> Function signature:
+ *  `defaultFG` and `defaultBG` change the default fore- and background-color.
+ *  Set `color` and `background-color` of the element your putting this into
+ *  yourself.
+ *
+ *  `parseInteractive` removes artifacts caused by the interactive
+ *  rewriting of the terminal window by some applications.
+ */
+function ansiToHTML(input, defaultFG="lighgrey", defaultBG="black", parseInteractive=true){
     return parsedHTMLCode;
 }
 
@@ -29,7 +36,7 @@ Not (yet) supported:
 - **style**: blink/dim/reversed
 - (unsupported codes are also logged to the console)
 
-For detailed information see the `ANSI` object in [ANSI-Escape.js](ANSI-Escape.js).
+For detailed information see the `ANSI_Styles` object in [ANSI-Escape.js](ANSI-Escape.js).
 
 
 ![Example output from test.js](img.png "Example output from test.js")
