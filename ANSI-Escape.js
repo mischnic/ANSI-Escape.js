@@ -56,10 +56,10 @@ function ansiToHTML(s, defaultFG, defaultBG, parseInteractive=true){
 	}
 
 	function objToCSS(o, del1 = ": ", del2 = ";"){
-		const key = Object.keys(o)
+		const keys = Object.keys(o)
 		return Object.keys(o)
 			.map((k)=> [k, o[k]].join(del1))
-			.join(del2) + (o.length > 0 ? del2 : "");
+			.join(del2) + (keys.length > 0 ? del2 : "");
 	}
 
 	const regex = /\x1B\x5b([0-9;]+m|[0-9][KG])/gu;
