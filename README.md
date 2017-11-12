@@ -23,7 +23,7 @@ document.querySelector("code > pre").innerHTML = parsedOutput;
 - **style**: bold/underlined/hidden
 - corresponding reset codes
 
-Not (yet) supported (these features will be ignored):
+Not (yet) supported:
 
 - **color**: 88/256 mode
 - **style**: blink/dim/reversed
@@ -32,4 +32,4 @@ Not (yet) supported (these features will be ignored):
 For detailed information see the `ANSI` object in [ANSI-Escape.js](ANSI-Escape.js).
 
 
-![Example output from test.js](img.png)
+![Example output from test.js](img.png "Example output from test.js")
