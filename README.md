@@ -2,7 +2,12 @@
 
 A Javascript library to render text with ANSI escape sequences using HTML and CSS.
 
-To save a command's output into a file _with escape sequences_ use: `script -q /dev/null ls -alG > file.log`.
+To force a command to use escape sequences (even without an interactive shell) use, depending on your OS:
+
+- `script -q /dev/null ls -alG` or
+- `script -qec "ls -alG" /dev/null`
+
+    (to save the output to a file: replace `/dev/null` with a filename)
 
 ## Usage
 
