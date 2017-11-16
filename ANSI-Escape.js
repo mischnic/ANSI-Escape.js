@@ -87,7 +87,7 @@ function ansiToHTML(s, defaultFG, defaultBG, parseInteractive=true){
 				count++;
 				return `<span style="${p1.slice(0, -1).split(";")
 						.map((v)=>{
-							const vi = parseInt(v) || "";
+							const vi = parseInt(v, 10) || "";
 							const style = ANSI_Styles[vi];
 							if(style){
 								last = {...last, ...style}
@@ -119,7 +119,7 @@ function ansiToHTML(s, defaultFG, defaultBG, parseInteractive=true){
 
 	return output.split("\n").map((s)=>{
 			return line(s);
-		}).join("\n");
+		}).join("<br/>");
 }
 
 window.ansiToHTML = ansiToHTML;
