@@ -8,8 +8,8 @@ const ANSI_Styles = {
 	7: {}, //REVERSE (swap fg & bg)
 	8: {opacity: "0"}, // hidden
 
-	21:	{"font-weight": "initial"}, //Reset bold/bright
-	22:	{opacity: 1}, //Reset dim
+	21:	{"font-weight": "initial"}, //Reset bold/bright - "22 isn't wildly supported"
+	22:	{opacity: 1, "font-weight": "initial"}, //Reset dim
 	24:	{"text-decoration": "initial"}, //Reset underlined
 	25:	{}, //Reset blink
 	27:	{}, //Reset reverse
@@ -56,6 +56,7 @@ const ANSI_Styles = {
 function ansiToHTML(s, defaultFG, defaultBG, parseInteractive=true){
 	// http://wiki.bash-hackers.org/scripting/terminalcodes
 	// https://misc.flogisoft.com/bash/tip_colors_and_formatting#colors
+	// https://github.com/chalk/ansi-styles/blob/master/index.js
 
 	function objToCSS(o, del1 = ": ", del2 = ";"){
 		const keys = Object.keys(o)
@@ -110,7 +111,7 @@ function ansiToHTML(s, defaultFG, defaultBG, parseInteractive=true){
 		}
 
 		const v = `<span style="${objToCSS(last)}">`+s.replace(regex, repl)+Array(count+1).join("</span>");
-		return v;
+		return v.replace(/<[^>]*><\/[^>]*>/g, ""); //remove empty tags
 	}
 
 	// http://www.rapidtables.com/code/text/ascii-table.htm
