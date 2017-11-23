@@ -52,21 +52,22 @@ const ANSI_Styles = {
 	106: {"background-color": "cyan"}, //lightcyan
 	107: {"background-color": "white"}
 }
+// http://wiki.bash-hackers.org/scripting/terminalcodes
+// https://misc.flogisoft.com/bash/tip_colors_and_formatting#colors
+// https://github.com/chalk/ansi-styles/blob/master/index.js
+// http://ascii-table.com/ansi-escape-sequences-vt-100.php
+// http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+// http://www.inwap.com/pdp10/ansicode.txt
 
 function ansiToHTML(s, parseInteractive=true){
-	// http://wiki.bash-hackers.org/scripting/terminalcodes
-	// https://misc.flogisoft.com/bash/tip_colors_and_formatting#colors
-	// https://github.com/chalk/ansi-styles/blob/master/index.js
-	// http://ascii-table.com/ansi-escape-sequences-vt-100.php
-	// http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
-	// http://www.inwap.com/pdp10/ansicode.txt
+	if(!s && typeof stringValue !== "string"){
+		return "";
+	}
 
 	function objToCSS(o, del1 = ": ", del2 = ";"){
-		const keys = Object.keys(o)
 		return Object.keys(o)
-
 			.map((k)=> [k, o[k]].join(del1))
-			.join(del2) + (keys.length > 0 ? del2 : "");
+			.join(del2);
 	}
 
 	function getNewStyle(old, next){
