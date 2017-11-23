@@ -1,6 +1,6 @@
 const ANSI_Styles = {
-	"": {color: "lightgrey", "background-color": "black", "font-weight": "initial", "text-decoration": "initial", opacity: 1},
-	0:  {color: "lightgrey", "background-color": "black", "font-weight": "initial", "text-decoration": "initial", opacity: 1},
+	"": {color: null, "background-color": null, "font-weight": null, "text-decoration": null, opacity: null},
+	0:  {color: null, "background-color": null, "font-weight": null, "text-decoration": null, opacity: null},
 	1: {"font-weight": "bold"},
 	2: {"opacity": "0.8"}, //DIM
 	4: {"text-decoration": "underline"}, //underlined
@@ -8,12 +8,12 @@ const ANSI_Styles = {
 	7: {}, //REVERSE (swap fg & bg)
 	8: {opacity: "0"}, // hidden
 
-	21:	{"font-weight": "initial"}, //Reset bold/bright - "22 isn't wildly supported"
-	22:	{opacity: 1, "font-weight": "initial"}, //Reset dim
-	24:	{"text-decoration": "initial"}, //Reset underlined
+	21:	{"font-weight": null}, //Reset bold/bright - "22 isn't wildly supported"
+	22:	{opacity: null, "font-weight": null}, //Reset dim
+	24:	{"text-decoration": null}, //Reset underlined
 	25:	{}, //Reset blink
 	27:	{}, //Reset reverse
-	28:	{opacity: 1}, //Reset hidden
+	28:	{opacity: null}, //Reset hidden
 
 
 	30: {color: "black;"},
@@ -24,7 +24,7 @@ const ANSI_Styles = {
 	35: {color: "darkmagenta;"}, //magenta
 	36: {color: "darkcyan;"}, //cyan
 	37: {color: "lightgrey;"},
-	39: {color: "lightgrey;"}, //initial
+	39: {color: null}, //initial
 	90: {color: "#555;"}, //darkgrey
 	91:	{color: "orangered;"},
 	92:	{color: "lime;"},
@@ -42,7 +42,7 @@ const ANSI_Styles = {
 	45: {"background-color": "darkmagenta"}, //magenta
 	46: {"background-color": "darkcyan"}, //cyan
 	47: {"background-color": "lightgrey"},
-	49: {"background-color": "black"}, //initial
+	49: {"background-color": null}, //initial
 	100: {"background-color": "#555"}, //darkgrey
 	101: {"background-color": "orangered"},
 	102: {"background-color": "lime"},
@@ -53,70 +53,64 @@ const ANSI_Styles = {
 	107: {"background-color": "white"}
 }
 
-function ansiToHTML(s, defaultFG, defaultBG, parseInteractive=true){
+function ansiToHTML(s, parseInteractive=true){
 	// http://wiki.bash-hackers.org/scripting/terminalcodes
 	// https://misc.flogisoft.com/bash/tip_colors_and_formatting#colors
 	// https://github.com/chalk/ansi-styles/blob/master/index.js
+	// http://ascii-table.com/ansi-escape-sequences-vt-100.php
+	// http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+	// http://www.inwap.com/pdp10/ansicode.txt
 
 	function objToCSS(o, del1 = ": ", del2 = ";"){
 		const keys = Object.keys(o)
 		return Object.keys(o)
+
 			.map((k)=> [k, o[k]].join(del1))
 			.join(del2) + (keys.length > 0 ? del2 : "");
 	}
 
-	const regex = /\x1B\x5b([0-9;]*m|[0-9][KG])/gu;
+	function getNewStyle(old, next){
+		const updated = {...old, ...next};
 
-	if(defaultBG){
-		ANSI_Styles[0]["background-color"] = defaultBG;
-		ANSI_Styles[""]["background-color"] = defaultBG;
-		ANSI_Styles[49]["background-color"] = defaultBG;
-	}
-	if(defaultFG){
-		ANSI_Styles[0]["color"] = defaultFG;
-		ANSI_Styles[""]["color"] = defaultFG;
-		ANSI_Styles[39]["color"] = defaultFG;
-	}
-
-	let last = {};
-
-	function line(s){
-		let count = 1;
-
-		function repl(match, p1, offset, string){
-			if(p1.endsWith("m")){
-				count++;
-				return `<span style="${p1.slice(0, -1).split(";")
-						.map((v)=>{
-							const vi = parseInt(v, 10) || "";
-							const style = ANSI_Styles[vi];
-							if(style){
-								last = {...last, ...style}
-								if(vi === 0 || vi === "" || vi === 39){
-									delete last["color"];
-								}
-								if(vi === 0 || vi === "" || vi === 49){
-									delete last["background-color"];
-								}
-
-								return objToCSS(ANSI_Styles[vi]);
-							} else {
-								console.error("unknown ansi code:" + vi);
-								return "";
-							}
-						}).join(" ")}">`;
-			} else{
-				return "";
+		for(const k of Object.keys(updated)){
+			if(updated[k] === null){
+				delete updated[k];
 			}
 		}
 
-		const v = `<span style="${objToCSS(last)}">`+s.replace(regex, repl)+Array(count+1).join("</span>");
-		return v.replace(/<[^>]*><\/[^>]*>/g, ""); //remove empty tags
+		return updated;
+	}
+
+	const escapeRegex = "\\x1B=|\\x1B\\x5b((?:[0-9;]*m|[0-9][KG]|\\?1h))";
+	const regex = new RegExp(escapeRegex+"([^\\x1B]*)","gu");
+
+	let curStyle = {};
+
+	function line(s){
+
+		function repl(match, p1, p2, offset, string){
+			if(p1 && p1.endsWith("m")){
+				p1 = p1.slice(0, -1);
+				const vi = parseInt(p1, 10) || "";
+				const style = ANSI_Styles[vi];
+				if(!style){
+					console.error("unknown ansi code:" + p1);
+				}
+				curStyle = getNewStyle(curStyle, style);
+
+				return `<span style="${objToCSS(curStyle)}">${p2||""}</span>`;
+			} else {
+				return p2 || "";
+			}
+		}
+
+		const content = s.replace(regex, repl).replace(/^\r+/g, "");
+		return content.replace(/<[^>]*><\/[^>]*>/g, ""); //remove empty tags
 	}
 
 	// http://www.rapidtables.com/code/text/ascii-table.htm
 	// http://wiki.bash-hackers.org/scripting/terminalcodes
-	let output = parseInteractive ? s.replace(/\r\n/g, "\n").replace(/\r +\r/g, "") : s;
+	let output = parseInteractive ? s.replace(/\r\n/g, "\n").replace(/\r.+\r/g, "") : s;
 
 	return output.split("\n").map((s)=>{
 			return line(s);

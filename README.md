@@ -12,33 +12,31 @@ To force a command to use escape sequences (even without an interactive shell) u
 ## Usage
 
 ```javascript
-/* >>> Function signature:
- *  `defaultFG` and `defaultBG` change the default fore- and background-color.
- *  Set `color` and `background-color` of the element your putting this into
- *  yourself.
- *
+/* 
  *  `parseInteractive` removes artifacts caused by the interactive
  *  rewriting of the terminal window by some applications.
  */
-function ansiToHTML(input, defaultFG="lighgrey", defaultBG="black", parseInteractive=true){
+function ansiToHTML(input, parseInteractive=true){
+    ....
     return parsedHTMLCode;
 }
 
+
 const cmdOutput = "... some text with escape sequences";
 const parsedOutput = ansiToHTML(cmdOutput);
-document.querySelector("code > pre").innerHTML = parsedOutput;
+document.querySelector(".console > code > pre").innerHTML = parsedOutput;
 ```
 
 ## Supported features
 
 - **color**: 8/16 mode
-- **style**: bold/underlined/hidden
+- **style**: bold/underlined/dim/hidden
 - corresponding reset codes
 
 Not (yet) supported:
 
 - **color**: 88/256 mode
-- **style**: blink/dim/reversed
+- **style**: blink/reversed
 - (unsupported codes are also logged to the console)
 
 For detailed information see the `ANSI_Styles` object in [ANSI-Escape.js](ANSI-Escape.js).
