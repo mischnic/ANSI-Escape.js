@@ -8,12 +8,12 @@ const ANSI_Styles = {
 	7: {}, //REVERSE (swap fg & bg)
 	8: {opacity: "0"}, // hidden
 
-	21:	{"font-weight": null}, //Reset bold/bright - "22 isn't wildly supported"
-	22:	{opacity: null, "font-weight": null}, //Reset dim
-	24:	{"text-decoration": null}, //Reset underlined
-	25:	{}, //Reset blink
-	27:	{}, //Reset reverse
-	28:	{opacity: null}, //Reset hidden
+	21: {"font-weight": null}, //Reset bold/bright - "22 isn't wildly supported"
+	22: {opacity: null, "font-weight": null}, //Reset dim
+	24: {"text-decoration": null}, //Reset underlined
+	25: {}, //Reset blink
+	27: {}, //Reset reverse
+	28: {opacity: null}, //Reset hidden
 
 
 	30: {color: "black;"},
@@ -26,13 +26,13 @@ const ANSI_Styles = {
 	37: {color: "lightgrey;"},
 	39: {color: null}, //initial
 	90: {color: "#555;"}, //darkgrey
-	91:	{color: "orangered;"},
-	92:	{color: "lime;"},
-	93:	{color: "yellow;"}, //lightyellow
-	94:	{color: "steelblue;"}, //lightblue
-	95:	{color: "magenta;"}, //lightmagenta
-	96:	{color: "cyan;"}, //lightcyan
-	97:	{color: "white;"},
+	91: {color: "orangered;"},
+	92: {color: "lime;"},
+	93: {color: "yellow;"}, //lightyellow
+	94: {color: "steelblue;"}, //lightblue
+	95: {color: "magenta;"}, //lightmagenta
+	96: {color: "cyan;"}, //lightcyan
+	97: {color: "white;"},
 
 	40: {"background-color": "black"},
 	41: {"background-color": "red"},
@@ -111,7 +111,7 @@ function ansiToHTML(s, parseInteractive=true){
 
 	// http://www.rapidtables.com/code/text/ascii-table.htm
 	// http://wiki.bash-hackers.org/scripting/terminalcodes
-	let output = parseInteractive ? s.replace(/\r\n/g, "\n").replace(/\r.+\r/g, "") : s;
+	let output = parseInteractive ? s.replace(/\r\n/g, "\n").replace(/\r.+\r/g, "").replace(/.\x08/g, "") : s;
 
 	return output.split("\n").map((s)=>{
 			return line(s);
