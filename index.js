@@ -83,7 +83,7 @@ function ansiToHTML(s, parseInteractive=true){
 	}
 
 	const escapeRegex = "\\x1B[=>]|\\x1B\\x5b((?:[0-9;]*m|[0-9]?[KG]|\\?1[hl]))";
-	const regex = new RegExp(escapeRegex+"([^\\x1B]*)","gu");
+	const regex = new RegExp(escapeRegex+"([^\\x1B]*)","g");
 
 	let curStyle = {};
 
